@@ -1,9 +1,4 @@
 from collections import *
-#
-
-#
-# starter file for hw1pr2, cs35 spring 2017...
-#
 
 import csv
 import random
