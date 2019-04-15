@@ -9,7 +9,9 @@ def lastTenAvgsToCSV(allGameRows, filename):
 
 def generateAllLastTenAvgs(gameRows):
     avgRows = []
-    for i in range(10,len(gameRows)):
+    headerRow = gameRows[0]
+    avgRows.append(headerRow)
+    for i in range(11,len(gameRows)):
         #just get the points from the current game
         points = gameRows[i][len(gameRows[i])-1]
         newRow = getLastTenAvg(gameRows[i-10:i],points)
@@ -35,10 +37,14 @@ def write_to_csv( list_of_rows, filename ):
         print("File", filename, "could not be opened for writing...")
 
 def main():
-    allgames = [None]*82
-    for g in range(0,len(allgames)):
+    headerRow = ["p","p","p","p","p","p"]
+    allgames = [None]*83
+    allgames[0] = headerRow
+    print (allgames)
+    for g in range(1,len(allgames)):
         newGameRow = [None]*5
         for i in range(0,len(newGameRow)):
+            print(len(newGameRow))
             stat = random.randint(0,100)
             newGameRow[i] = stat
         allgames[g] = newGameRow
