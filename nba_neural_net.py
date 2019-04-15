@@ -7,13 +7,30 @@ from sklearn.neural_network import MLPRegressor
 
 import numpy as np
 import pandas as pd
+import os
+import os.path
+import shutil
+
+
+path = "/csvstats/"
+
+all_files = list(os.walk(path))
+
+li = []
+
+for filename in all_files:
+    currentdf = pd.read_csv(filename, index_col=None, header=0)
+    li.append(currentdf)
+
+df = pd.concat(li, axis=0, ignore_index=True)
 
 
 
-print("+++ Start of iris example +++\n")
+
 # For Pandas's read_csv, use header=0 when you know row 0 is a header row
 # df here is a "dataframe":
-df = pd.read_csv('filename.csv', header=0)    # read the file
+# df = pd.read_csv('filename.csv', header=0)    # read the file
+
 df.head()                                 # first few lines
 df.info()                                 # column details
 
@@ -22,14 +39,21 @@ df.info()                                 # column details
 
 print("+++ Converting to numpy arrays... +++")
 # Data needs to be in numpy arrays - these next two lines convert to numpy arrays
-X_data_complete = df.iloc[:,0:64].values        # iloc == "integer locations" of rows/cols
-y_data_complete = df[ '64' ].values        # individually addressable columns (by name)
+X_data_complete = df.iloc[:,0:64].values        # replace '64' with the index that the points are in 
+y_data_complete = df[ '64' ].values        # replace '64' with the index that the points are in 
 
-X_unknown = X_data_complete[0:20,0:64]      
-y_unknown = y_data_complete[0:20]
 
-X_known = X_data_complete[20:,0:64]
-y_known = y_data_complete[20:]
+# this segregates unlabeled data (the games that we want to predict)
+# first row in the csv should be the inputs of a game that we want to predict and leave the points blank 
+
+# X_unknown = X_data_complete[0:20,0:64]      
+# y_unknown = y_data_complete[0:20]
+
+# X_known = X_data_complete[20:,0:64]
+# y_known = y_data_complete[20:]
+
+X_known = X_data_complete[:,0:64] #replace '64' with index with the points
+y_known = y_data_complete[:]
 
 #
 # we can scramble the remaining data if we want to (we do)
@@ -42,7 +66,7 @@ y_known = y_known[indices]
 #
 # from the known data, create training and testing datasets
 #
-TRAIN_FRACTION = 0.85
+TRAIN_FRACTION = 0.50
 TRAIN_SIZE = int(TRAIN_FRACTION*KNOWN_SIZE)
 TEST_SIZE = KNOWN_SIZE - TRAIN_SIZE   # not really needed, but...
 X_train = X_known[:TRAIN_SIZE]
