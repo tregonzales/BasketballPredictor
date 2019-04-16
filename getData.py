@@ -3,6 +3,9 @@ import requests
 import time
 from nba_py.constants import TEAMS
 from selenium import webdriver
+from defEffenciencies import allDefEff
+import averageGames
+import json
 
 def get_defensive_efficiency(team, season):
     """
@@ -15,7 +18,7 @@ def get_defensive_efficiency(team, season):
     stats_url = "https://stats.nba.com/team/"+team_id+"/advanced/?Season="+ \
     prev_year+"-"+current_year_short+"&SeasonType=Regular%20Season&Split=lastn&sort=DEF_RATING&dir=1"
     # run firefox webdriver
-    driver = webdriver.Chrome(executable_path='/Users/devang/Desktop/BasketballPredictor/chromedriver')
+    driver = webdriver.Chrome(executable_path='/Users/user/develop/BasketballPredictor/chromedriver')
     # get web page
     driver.get(stats_url)
     # # sleep for 10s so javascript loads
@@ -59,14 +62,62 @@ def get_team_stats(team, season):
         if len(cols) > 0:
             # set away (@) to 1 and home ('') to 0
             if(cols[2] == '@'):
-                cols[2] = 1
+                cols[2] = '1'
             else:
-                cols[2] = 0
+                cols[2] = '0'
+            if(cols[4] == 'W'):
+                cols[4] = '1'
+            else:
+                cols[4] = '0'
             # get rid of blank col
+            #set date and team to zero for easy csv
+            cols[1] = '0'
             del cols[23]
             opponent = cols[3]
-            cols.append(get_defensive_efficiency(opponent, season))
+            cols[3] = '0'
+            cols.append(allDefEff[opponent+str(season)])
+            for i in range(len(cols)):
+                if cols[i].isdigit() or "." in cols[i]:
+                    cols[i] = float(cols[i])
             output.append(cols)
     return output
 
-get_team_stats('ATL', 2017)
+def makeCSV(team, season):
+    csvName = team+str(season)+".csv"
+    seasonLog = get_team_stats(team, season)
+    averageGames.lastTenAvgsToCSV(seasonLog, csvName)
+    
+def makeAllCSVs():
+    allTeams = TEAMS
+    for x in range(2017,2020):
+        for tm in allTeams:
+            if tm=="BKN":
+                tm="BRK"
+            elif tm=="PHX":
+                tm="PHO"
+            elif tm=="CHA":
+                tm="CHO"
+            print("making csv for"+(tm+str(x)))
+            makeCSV(tm,x)
+
+#this got all the defeffs and put it into the txt file, and then we made it a py file to use the array
+def collectDEF():
+    allDefs = {}
+    allTeams = TEAMS
+    
+    for x in range(2017,2020):
+        for tm in allTeams:
+            dfe = get_defensive_efficiency(tm, x)
+            curKey = tm+str(x)
+            allDefs[curKey] = dfe
+                
+    try:
+        file = open( "defEffenciencies.txt", "w")
+        file.write(json.dumps(allDefs))
+        file.close()
+    except:
+        print("could not make text file...")
+    print(allDefs)
+
+# makeAllCSVs()
+# get_team_stats('ATL', 2017)
