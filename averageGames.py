@@ -2,6 +2,9 @@ from collections import *
 
 import csv
 import random
+import os
+import os.path
+import shutil
 
 def lastTenAvgsToCSV(allGameRows, filename):
     rows = generateAllLastTenAvgs(allGameRows)
