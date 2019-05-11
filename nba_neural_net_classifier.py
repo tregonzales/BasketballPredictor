@@ -5,6 +5,7 @@
 from sklearn.datasets import fetch_mldata
 # from sklearn.neural_network import MLPRegressor
 from sklearn.neural_network import MLPClassifier
+# import matplotlib.pyplot as plt
 
 
 import numpy as np
@@ -37,15 +38,23 @@ df.head()                                 # first few lines
 
 df = df.drop('Rk', axis=1)
 df = df.drop('Date', axis=1)
-itemsToDrop = ['Opp','Opponent FG','Opponent FGA','Opponent FG%','Opponent 3P','Opponent 3PA','Opponent 3P%','Opponent FT','Opponent FTA','Opponent FT%','Opponent ORB','Opponent TRB','Opponent AST','Opponent STL','Opponent BLK','Opponent TOV','Opponent PF']
+itemsToDrop = ['Opp.1','TOV','Opp','Opponent FG','Opponent FGA','Opponent FG%','Opponent 3P','Opponent 3PA','Opponent 3P%','Opponent FT','Opponent FTA','Opponent FT%','Opponent ORB','Opponent TRB','Opponent AST','Opponent STL','Opponent BLK','Opponent TOV','Opponent PF']
 for item in itemsToDrop:
     df = df.drop(item, axis=1)
 
 def pointsTransform(n):
-    if n >= 100:
-        return ">100"
+    if n>=100:
+        return ">=100"
     else:
         return "<100"
+    # if n >= 110:
+    #     return ">=110"
+    # elif n>=100:
+    #     return ">=100"
+    # elif n>=90:
+    #     return ">=90"
+    # else:
+    #     return "<90"
 
 df['gamePoints'] = df['gamePoints'].map(pointsTransform)
 
@@ -106,9 +115,9 @@ if USE_SCALER == True:
     X_test = scaler.transform(X_test)
     # X_unknown = scaler.transform(X_unknown)
 
-# https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPRegressor.html#sklearn.neural_network.MLPRegressor
+# https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPRegressor.html
 
-mlp = MLPClassifier(hidden_layer_sizes=(2,7,5,), max_iter=200, alpha=1e-4,
+mlp = MLPClassifier(hidden_layer_sizes=(2,5,7,), max_iter=400, alpha=1e-4,
                     solver='sgd', verbose=True, shuffle=True, early_stopping = False, # tol=1e-4,
                     random_state=None, # reproduceability
                     learning_rate_init=.1, learning_rate = 'adaptive')
@@ -122,14 +131,15 @@ print("Training set score: %f" % mlp.score(X_train, y_train))
 print("Test set score: %f" % mlp.score(X_test, y_test))
 
 # let's see the coefficients -- the nnet weights!
+print ("da weights")
 CS = [coef.shape for coef in mlp.coefs_]
 print(CS)
 
 # predictions:
-# predictions = mlp.predict(X_test)
-# from sklearn.metrics import classification_report,confusion_matrix
-# print("\nConfusion matrix:")
-# print(confusion_matrix(y_test,predictions))
+predictions = mlp.predict(X_test)
+from sklearn.metrics import classification_report,confusion_matrix
+print("\nConfusion matrix:")
+print(confusion_matrix(y_test,predictions))
 #
 # print("\nClassification report")
 # print(classification_report(y_test,predictions))
@@ -141,6 +151,17 @@ print(CS)
 # print("  Correct values:   CORRECT_SCORE ")
 # print("  Our predictions: ", unknown_predictions)
 #
+#some visualiation i found on the interwebs
+# fig, axes = plt.subplots(4, 4)
+# # use global min / max to ensure all weights are shown on the same scale
+# vmin, vmax = mlp.coefs_[0].min(), mlp.coefs_[0].max()
+# for coef, ax in zip(mlp.coefs_[0].T, axes.ravel()):
+#     ax.matshow(coef.reshape(19,1), cmap=plt.cm.gray, vmin=.5 * vmin,
+#                vmax=.5 * vmax)
+#     ax.set_xticks(())
+#     ax.set_yticks(())
+#
+# plt.show()
 
 if False:
     L = [5.2, 4.1, 1.5, 0.1]

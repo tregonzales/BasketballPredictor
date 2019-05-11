@@ -17,7 +17,7 @@ def get_defensive_efficiency(team, season):
     current_year_short = str(season)[-2:]
     stats_url = "https://stats.nba.com/team/"+team_id+"/advanced/?Season="+ \
     prev_year+"-"+current_year_short+"&SeasonType=Regular%20Season&Split=lastn&sort=DEF_RATING&dir=1"
-    # run firefox webdriver
+    # if you want to use the chromediver, make sure the path is the path on your local machine!!!!!
     driver = webdriver.Chrome(executable_path='/Users/user/develop/BasketballPredictor/chromedriver')
     # get web page
     driver.get(stats_url)
@@ -86,7 +86,7 @@ def makeCSV(team, season):
     csvName = team+str(season)+".csv"
     seasonLog = get_team_stats(team, season)
     averageGames.lastTenAvgsToCSV(seasonLog, csvName)
-    
+
 def makeAllCSVs():
     allTeams = TEAMS
     for x in range(2017,2020):
@@ -104,13 +104,13 @@ def makeAllCSVs():
 def collectDEF():
     allDefs = {}
     allTeams = TEAMS
-    
+
     for x in range(2017,2020):
         for tm in allTeams:
             dfe = get_defensive_efficiency(tm, x)
             curKey = tm+str(x)
             allDefs[curKey] = dfe
-                
+
     try:
         file = open( "defEffenciencies.txt", "w")
         file.write(json.dumps(allDefs))
